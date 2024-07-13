@@ -1,0 +1,123 @@
+@startuml online_market
+package online_market {
+    package orders {
+        interface I_Order_Service {
+            --
+            + {abstract} place_order(customer: Customer, products: list[Product]) -> Order
+            + {abstract} cancel_order(order_id: int) -> none
+            + {abstract} send_order(order_id: int) -> none
+            + {abstract} receive_order(order_id: int) -> none
+        }
+
+        class Order_Manager {
+            - «get» owner : Owner
+            # «get» orders : dict[Order]
+            --
+            - generate_id() -> int
+            + place_order(customer: Customer, products: list[Product]) -> Order
+            + cancel_order(order_id: int) -> bool
+            + send_order(order_id: int) -> none
+            + receive_order(order_id: int) -> none
+            + list_orders() -> list[Order]
+        }
+
+        class Order {
+            - «get» id : int
+            - «get» customer : Customer
+            # «get» status : int
+            # «get» products : list[Product]
+            --
+            + cancel() -> bool
+            + send() -> none
+            + receive() -> none
+            + print() -> none
+        }
+        
+    }
+
+    package products {
+        interface I_Product_Manager {
+            --
+            + {abstract} register_product(id: int, name: str, price: float) -> none
+            + {abstract} add_product(product_id: int, ammount: int) -> none
+            + {abstract} remove_product(product_id: int, ammount: int) -> none
+            + {abstract} get_product(product_id: int) -> Product
+            + {abstract} retrieve_product(product_id: int, ammount: int) -> Product
+        }
+
+        class Product_Manager {
+            - «get» owner : Owner
+            # «get» products : dict[Product]
+            --
+            + register_product(id: int, name: str, price: float) -> none
+            + add_product(product_id: int, ammount: int) -> none
+            + remove_product(product_id: int, ammount: int) -> none
+            + get_product(product_id: int) -> Product
+            + retrieve_product(product_id: int, ammount: int) -> Product
+            + list_products() -> list[Product]
+        }
+
+        class Product {
+            - «get» id : int
+            - «get» owner : Owner
+            # «get/set» name : str 
+            # «get/set» price : float
+            # «get/set» quantity : int
+            --
+            + print() -> none
+            + get_total_price() -> float
+        }
+    }
+
+    package users {
+        abstract class Abstract_User {
+            - «get» id : int
+            # «get/set» name : str
+            - «get» password : str 
+            --
+            + get_permissions() -> list[str]
+            + change_password() -> none
+        }
+
+        class Owner {
+            - «get» products : Product_Manager
+            - «get» orders : Order_Manager
+            --
+            + add_product(name: str, price: float, quantity: int) -> none
+            + remove_product(product_id: int) -> none
+            + send_order(order_id: int) -> none
+        }
+
+        class Customer {
+            # «get/set» address : str
+            # «get» orders: list[Order]
+            --
+            + place_order(market_owner: Owner) -> none
+            + get_order(order_id: int) -> Order
+            + cancel_order(order_id: int) -> none
+            + confirm_arrival(order_id: int) -> none
+        }
+    }
+}
+
+' orders
+I_Order_Service <|.. Order_Manager
+Product " 1..n " <-right-- " 1 " Order : " contains     "
+
+Order_Manager " 1 " --> " 0..n " Order : " contains "
+
+' products
+I_Product_Manager <|.. Product_Manager
+
+Product_Manager " 1 " --> " 0..n " Product : " contains "
+
+' users
+Abstract_User <|-- Owner
+Abstract_User <|-- Customer
+
+Owner ---> " 1 " Order_Manager : " has "
+Owner ---> " 1 " Product_Manager : " has "
+Customer ---> Order_Manager : " uses "
+
+
+@enduml
