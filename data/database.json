@@ -1,0 +1,61 @@
+{
+    "owner": {
+        "id": 0,
+        "name": "admin",
+        "password": "123"
+    },
+    "customers": [
+        {
+            "id": 1,
+            "name": "Brugger",
+            "password": "998877",
+            "address": {
+                "street": "Rua Tal",
+                "city": "Belo Horizonte",
+                "state": "Minas Gerais",
+                "zip_code": "12345678-09",
+                "house_number": 123,
+                "complement": "A"
+            }
+        }
+    ],
+    "products": [
+        {
+            "id": 0,
+            "owner_id": 0,
+            "name": "Notebook",
+            "price": 3000.0,
+            "quantity": 3
+        },
+        {
+            "id": 1,
+            "owner_id": 0,
+            "name": "Monitor",
+            "price": 800.0,
+            "quantity": 5
+        },
+        {
+            "id": 2,
+            "owner_id": 0,
+            "name": "Headset",
+            "price": 249.99,
+            "quantity": 10
+        }
+    ],
+    "orders": [
+        {
+            "id": 0,
+            "customer_id": 1,
+            "status": "Novo",
+            "products": [
+                {
+                    "id": 0,
+                    "owner_id": 0,
+                    "name": "Notebook",
+                    "price": 3000.0,
+                    "quantity": 1
+                }
+            ]
+        }
+    ]
+}
