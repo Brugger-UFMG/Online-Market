@@ -18,4 +18,4 @@ O diagrama UML de classes do projeto foi criado utilizando a ferramenta PlantUML
 No diagrama, é possível observar os conceitos de programação orientada a objetos, como interfaces, classes abstratas, herança, encapsulamento, etc.  
 Também está representado como o código foi modularizado em diferentes packages, e como as diferentes classes dos diferentes pacotes se relacionam e interagem.
 
-![Diagrama UML de Classes](https://github.com/Brugger-UFMG/POO-Exame_Especial/blob/a22d51a8d44b364f4410c75d04c4d04359cc5a0a/docs/online_market.png)
+![Diagrama UML de Classes](https://github.com/Brugger-UFMG/POO-Exame_Especial/blob/3c586b680561176c375cbda6064b2d4b01035fe9/docs/online_market.png)
