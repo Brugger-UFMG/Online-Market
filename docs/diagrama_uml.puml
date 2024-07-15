@@ -1,17 +1,18 @@
 @startuml online_market
+
 package online_market {
     package orders {
         interface I_Order_Service {
             --
             + {abstract} place_order(customer: Customer, products: list[Product]) -> Order
-            + {abstract} cancel_order(order_id: int) -> none
+            + {abstract} cancel_order(order_id: int) -> bool
             + {abstract} send_order(order_id: int) -> none
             + {abstract} receive_order(order_id: int) -> none
         }
 
         class Order_Manager {
             - «get» owner : Owner
-            # «get» orders : dict[Order]
+            # «get» orders : dict[Order.id, Order]
             --
             - generate_id() -> int
             + place_order(customer: Customer, products: list[Product]) -> Order
@@ -19,18 +20,20 @@ package online_market {
             + send_order(order_id: int) -> none
             + receive_order(order_id: int) -> none
             + list_orders() -> list[Order]
+            + ids() -> set[int]
         }
 
         class Order {
             - «get» id : int
             - «get» customer : Customer
-            # «get» status : int
+            # «get» status : str
             # «get» products : list[Product]
+            # «get» price : float
             --
             + cancel() -> bool
-            + send() -> none
-            + receive() -> none
-            + print() -> none
+            + send() -> bool
+            + receive() -> bool
+            + description(id: int) -> str
         }
         
     }
@@ -47,14 +50,16 @@ package online_market {
 
         class Product_Manager {
             - «get» owner : Owner
-            # «get» products : dict[Product]
+            # «get» products : dict[Product.id, Product]
             --
             + register_product(id: int, name: str, price: float) -> none
             + add_product(product_id: int, ammount: int) -> none
             + remove_product(product_id: int, ammount: int) -> none
+            + delete_product(product_id: int) -> none
             + get_product(product_id: int) -> Product
             + retrieve_product(product_id: int, ammount: int) -> Product
             + list_products() -> list[Product]
+            + ids() -> set[int]
         }
 
         class Product {
@@ -64,7 +69,7 @@ package online_market {
             # «get/set» price : float
             # «get/set» quantity : int
             --
-            + print() -> none
+            + description() -> str
             + get_total_price() -> float
         }
     }
@@ -75,49 +80,71 @@ package online_market {
             # «get/set» name : str
             - «get» password : str 
             --
+            + {abstract} view_orders() -> none
+            + view_products(market: Product_Manager) -> none
             + get_permissions() -> list[str]
             + change_password() -> none
+            # select_product(products: Product_Manager, message: str) -> int
         }
 
         class Owner {
-            - «get» products : Product_Manager
-            - «get» orders : Order_Manager
+            - «get/set» products : Product_Manager
+            - «get/set» orders : Order_Manager
             --
-            + add_product(name: str, price: float, quantity: int) -> none
-            + remove_product(product_id: int) -> none
-            + send_order(order_id: int) -> none
+            + view_orders() -> none
+            + add_product() -> none
+            + remove_product() -> none
+            + send_order() -> none
+            - register_product() -> none
+            - add_to_product() -> none
+            - delete_product() -> none
+            - remove_from_product() -> none
+
         }
 
         class Customer {
-            # «get/set» address : str
-            # «get» orders: list[Order]
+            # «get/set» address : Address
+            # «get/set» orders: list[Order]
             --
+            + view_orders() -> none
+            + view_products(market: Product_Manager) -> none
             + place_order(market_owner: Owner) -> none
-            + get_order(order_id: int) -> Order
-            + cancel_order(order_id: int) -> none
-            + confirm_arrival(order_id: int) -> none
+            + get_order() -> Order
+            + cancel_order() -> none
+            + confirm_arrival() -> none
+            - get_product_from_market(market: Product_Manager) -> Product | none
+            - remove_product_from_list(products: list[Product]) -> none
+        }
+
+        class Address {
+            + «get/set» street: str
+            + «get/set» city: str
+            + «get/set» state: str
+            + «get/set» zip_code: str
+            + «get/set» house_number: int
+            + «get/set» complement: str
         }
     }
 }
 
 ' orders
-I_Order_Service <|.. Order_Manager
+I_Order_Service <|.down. Order_Manager
 Product " 1..n " <-right-- " 1 " Order : " contains     "
 
-Order_Manager " 1 " --> " 0..n " Order : " contains "
+Order_Manager " 1 " -down-> " 0..n " Order : " contains "
 
 ' products
-I_Product_Manager <|.. Product_Manager
+I_Product_Manager <|.down. Product_Manager
 
-Product_Manager " 1 " --> " 0..n " Product : " contains "
+Product_Manager " 1 " -down-> " 0..n " Product : " contains "
 
 ' users
 Abstract_User <|-- Owner
 Abstract_User <|-- Customer
 
-Owner ---> " 1 " Order_Manager : " has "
-Owner ---> " 1 " Product_Manager : " has "
-Customer ---> Order_Manager : " uses "
+Owner -down--> " 1 " Order_Manager : " has "
+Owner -down--> " 1 " Product_Manager : " has "
+Customer -down-> Address : " has a "
 
 
 @enduml
