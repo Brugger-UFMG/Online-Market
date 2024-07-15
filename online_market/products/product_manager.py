@@ -23,6 +23,7 @@ class Product_Manager(I_Product_Manager):
             Produtos, by default dict()
         """
         self.__owner = owner
+        self.__owner.products = self
         self._products = products
 
     def register_product(self, id: int, name: str, price: float) -> None:
@@ -102,6 +103,27 @@ class Product_Manager(I_Product_Manager):
         else:
             self._products[product_id].quantity -= ammount
 
+    def delete_product(self, product_id: int) -> None:
+        """
+        Deleta completamente um produto e seu Id.
+        Este método não verifica se o produto existe em outras partes do sistema,
+        o que pode gerar conflitos de Id.
+
+        Parameters
+        ----------
+        product_id : int
+            Id do produto
+
+        Raises
+        ------
+        KeyError
+            Caso o id não exista
+        """
+        if product_id not in self._products.keys():
+            raise KeyError("Id não existe!")
+        else:
+            self._products.pop(product_id)
+
     def get_product(self, product_id: int) -> Product:
         """
         Obtem um produto.
@@ -124,7 +146,7 @@ class Product_Manager(I_Product_Manager):
         if product_id not in self._products.keys():
             raise KeyError("Produto não existe!")
         else:
-            return self._products[product_id]
+            return deepcopy(self._products[product_id])
 
     def retrieve_product(self, product_id: int, ammount: int = 1) -> Product:
         """
@@ -168,14 +190,26 @@ class Product_Manager(I_Product_Manager):
 
     def list_products(self) -> list[Product]:
         """
-        Lista os produtos no sistema.
+        Lista os produtos no sistema, ordenados por seus Ids.
 
         Returns
         -------
         list[Product]
             Lista de produtos
         """
-        return list(self._products)
+        sorted_keys = self.ids()
+        return [self._products[key] for key in sorted_keys]
+
+    def ids(self) -> set[int]:
+        """
+        Retorna os Ids de todos produtos em ordem crescente.
+
+        Returns
+        -------
+        set[int]
+            Set contendo os Ids.
+        """
+        return set(sorted(self._products.keys()))
 
     @property
     def owner(self) -> "Owner":

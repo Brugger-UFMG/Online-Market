@@ -30,11 +30,16 @@ class Product:
         self._price = price
         self._quantity = quantity
 
-    def print(self) -> None:
+    def description(self) -> str:
         """
-        Printa o Produto
+        Produz uma descrição do produto.
+
+        Returns
+        -------
+        str
+            Descrição
         """
-        print(f"{self._quantity}x {self._name} - preço unitário = {self._price}")
+        return f"{self._quantity}x {self._name} - preço unitário = {self._price}"
 
     def get_total_price(self) -> float:
         """

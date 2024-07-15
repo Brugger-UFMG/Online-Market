@@ -21,10 +21,28 @@ class Order_Manager(I_Order_Service):
             Pedidos, by default dict()
         """
         self.__owner = owner
+        self.__owner.orders = self
         self._orders = orders
 
     def __generate_id(self) -> int:
-        return len(self._orders)
+        """
+        Cria um novo id válido.
+
+        Returns
+        -------
+        int
+            Id
+        """
+        sorted_ids = sorted(self._orders.keys())
+        if len(sorted_ids) == 0:
+            return 0
+        elif sorted_ids[-1] < len(sorted_ids):
+            return len(self._orders)
+        else:
+            for i, j in enumerate(sorted_ids):
+                if i < j:
+                    break
+            return i
 
     def place_order(self, customer: "Customer", products: list["Product"]) -> Order:
         """
@@ -53,7 +71,6 @@ class Order_Manager(I_Order_Service):
             order_id = self.__generate_id()
             order = Order(order_id, customer, products)
             self._orders[order_id] = order
-            customer.orders.append(order)
             return order
 
     def cancel_order(self, order_id: int) -> bool:
@@ -119,7 +136,27 @@ class Order_Manager(I_Order_Service):
             self._orders[order_id].receive()
 
     def list_orders(self) -> list[Order]:
-        return list(self._orders)
+        """
+        Lista todos os pedidos, os pedidos são ordenados de acordo com seus Ids.
+
+        Returns
+        -------
+        list[Order]
+            Lista dos pedidos.
+        """
+        sorted_keys = self.ids()
+        return [self._orders[key] for key in sorted_keys]
+
+    def ids(self) -> set[int]:
+        """
+        Retorna um set com todos Ids em ordem crescente.
+
+        Returns
+        -------
+        set[int]
+            Ids
+        """
+        return set(sorted(self._orders.keys()))
 
     @property
     def owner(self) -> "Owner":

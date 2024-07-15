@@ -13,7 +13,7 @@ class Order:
         id: int,
         customer: "Customer",
         products: list["Product"],
-        status: int = c.placed,
+        status: str = c.placed,
     ) -> None:
         """
         Pedido.
@@ -24,13 +24,15 @@ class Order:
             Identificador
         customer : Customer
             Cliente
-        products : list[&quot;Product&quot;]
+        products : list[Product]
             Produtos
-        status : int, optional
+        status : str, optional
             Status do Pedido, by default c.placed
         """
         self.__id = id
         self.__customer = customer
+        self.__customer.orders.append(self)
+
         self._status = status
         self._products = products
 
@@ -47,37 +49,65 @@ class Order:
         bool
             Se o pedido foi cancelado com sucesso
         """
-        if self._status == (c.placed or c.sent):
+        if self._status != c.canceled:
             self._status = c.canceled
             return True
         return False
 
-    def send(self) -> None:
+    def send(self) -> bool:
         """
         Envia o pedido.
+
+        Returns
+        -------
+        bool
+            Se o pedido foi enviado.
         """
         if self._status == c.placed:
             self._status = c.sent
+            return True
+        return False
 
-    def receive(self) -> None:
+    def receive(self) -> bool:
         """
         Confirma o recebimento do pedido.
+
+        Returns
+        -------
+        bool
+            Se o pedido foi confirmado recebido
         """
         if self._status == c.sent:
             self._status = c.finished
+            return True
+        return False
 
-    def print(self) -> None:
+    def description(self, id: int = -1) -> str:
         """
-        Printa o pedido.
+        Gera uma descrição do pedido.
+
+        Parameters
+        ----------
+        id : int, optional
+            Se deve ser usado um outro id, by default -1
+
+        Returns
+        -------
+        str
+            Descrição
         """
-        print("Pedido:")
-        print("- - - - -")
+        if id < 0:
+            id = self.__id
+
+        description = f"- Pedido {id} -\n"
         for product in self._products:
-            print(
-                f"\t{product.quantity}x {product.name} - {product.get_total_price():.2f}R$"
-            )
-        print("- - - - -")
-        print(f"Preço total: {self._price}\n")
+            description += f"> {product.quantity}x {product.name} = {product.get_total_price():.2f}R$\n"
+
+        description += f"\nPreço total: {self._price}"
+        description += f"\nCliente: {self.__customer.name}"
+        description += f"\nStatus: {self._status}\n"
+        description += "- - -"
+        return description
 
     @property
     def id(self) -> int:
@@ -88,16 +118,22 @@ class Order:
         return self.__customer
 
     @property
-    def status(self) -> int:
+    def status(self) -> str:
         return self._status
 
     @property
     def products(self) -> list["Product"]:
         return self._products
 
+    @property
+    def price(self) -> float:
+        return self._price
+
     def __repr__(self) -> str:
-        text: str = f"Order:[\n"
+        text: str = (
+            f"Order:(id={self.__id}, customer={self.__customer}, status={self._status}, products=[\n"
+        )
         for product in self._products:
             text += f"\t" + product.__repr__() + f"\n"
-        text += "]"
+        text += "])"
         return text
