@@ -1,8 +1,102 @@
+import json
+import os
 from typing import Type
 
 from users import Abstract_User, Address, Customer, Owner
+from products import Product_Manager, Product
+from orders import Order_Manager, Order
 
 import constants as C
+
+
+def save_data(
+    owner: Owner,
+    customers: dict[Customer.id, Customer],
+    products: Product_Manager,
+    orders: Order_Manager,
+    filename: str,
+) -> None:
+    """
+    Salva os dados do programa em um arquivo.
+
+    Parameters
+    ----------
+    owner : Owner
+        Dono
+    customers : dict[Customer.id, Customer]
+        Clientes
+    products : Product_Manager
+        Produtos
+    orders : Order_Manager
+        Pedidos
+    filename : str
+        Nome do arquivo a ser criado
+    """
+    data = {
+        "owner": owner.to_dict(),
+        "customers": [customer.to_dict() for customer in customers.values()],
+        "products": [product.to_dict() for product in products.list_products()],
+        "orders": [order.to_dict() for order in orders.list_orders()],
+    }
+
+    try:
+        with open(filename, "w") as file:
+            json.dump(data, file, indent=4)
+    except IOError as e:
+        print(f"Um erro ocorreu enquanto escrevendo os dados para {filename}: {e}")
+    except Exception as e:
+        print(f"Um erro inexperado ocorreu: {e}")
+
+
+def load_data(
+    filename: str,
+) -> tuple[Owner, dict[Customer.id, Customer], Product_Manager, Order_Manager]:
+    """
+    Carrega os dados do mercado de um arquivo JSON.
+
+    Parameters
+    ----------
+    filename : str
+        Caminho para o arquivo JSON.
+
+    Returns
+    -------
+    tuple[Owner, dict[Customer.id, Customer], Product_Manager, Order_Manager]
+        Tupla contendo: owner, customers, products e orders
+
+    Raises
+    ------
+    FileNotFoundError
+        Caso o arquivo não seja encontrado
+    json.JSONDecodeError
+        Caso ocorra um erro de decodificação
+    """
+    if not os.path.exists(filename):
+        raise FileNotFoundError("Arquivo {filename} não encontrado.")
+
+    with open(filename, "r") as file:
+        data = json.load(file)
+
+    owner = Owner.from_dict(data["owner"])
+
+    customers = {}
+    for customer_data in data["customers"]:
+        customer = Customer.from_dict(customer_data)
+        customers[customer.id] = customer
+
+    products_dict = {}
+    for product_data in data["products"]:
+        product = Product.from_dict(product_data, owner)
+        products_dict[product.id] = product
+    products = Product_Manager(owner, products_dict)
+
+    orders_dict = {}
+    for order_data in data["orders"]:
+        order = Order.from_dict(order_data, customers, owner)
+        orders_dict[order.id] = order
+    orders = Order_Manager(owner, orders_dict)
+
+    return owner, customers, products, orders
 
 
 def generate_auth_data(

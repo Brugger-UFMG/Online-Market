@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -29,6 +30,32 @@ class Product:
         self._name = name
         self._price = price
         self._quantity = quantity
+
+    @staticmethod
+    def from_dict(data: dict, owner: "Owner") -> Product:
+        expected_owner = data["owner_id"]
+        if owner.id != expected_owner:
+            raise ValueError(
+                f"Dono inválido! Esperado dono com id: {expected_owner}, recebeu id: {owner.id}"
+            )
+        return Product(data["id"], data["name"], data["price"], data["quantity"], owner)
+
+    def to_dict(self) -> dict:
+        """
+        Transforma o objeto em um dicionário.
+
+        Returns
+        -------
+        dict
+            Dicionário
+        """
+        return {
+            "id": self.__id,
+            "owner_id": self.__owner.id,
+            "name": self._name,
+            "price": self._price,
+            "quantity": self._quantity,
+        }
 
     def description(self) -> str:
         """

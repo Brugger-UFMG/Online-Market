@@ -1,12 +1,14 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING, Type
 
 from users import Abstract_User
 import users.helpers as h
 from products import Product
+from users import Address
 
 if TYPE_CHECKING:
     from orders import Order
-    from users import Address, Owner
+    from users import Owner
     from products import Product_Manager
 
 
@@ -38,6 +40,24 @@ class Customer(Abstract_User):
         super().__init__(id, name, password)
         self._address = address
         self._orders = orders
+
+    @staticmethod
+    def from_dict(data: dict) -> Customer:
+        address = Address.from_dict(data["address"])
+        return Customer(data["id"], data["name"], data["password"], address)
+
+    def to_dict(self) -> dict:
+        """
+        Transforma o objeto em um dicionário.
+
+        Returns
+        -------
+        dict
+            Dicionário
+        """
+        ret = super().to_dict()
+        ret.update({"address": self._address.to_dict()})
+        return ret
 
     def view_orders(self) -> None:
         """

@@ -1,43 +1,26 @@
 import json
-from copy import deepcopy
+import os
 
 from users import Abstract_User, Address, Customer, Owner
-from products import Product_Manager, Product
-from orders import Order, Order_Manager
+from products import Product_Manager
+from orders import Order_Manager
 
 import constants as C
 import functions as F
 
 
-def run():
+def run() -> None:
     # --- Inicialização --- #
-    # TODO carregar os dados e criar os objetos do programa
-    # Obtem os usuários do sistema
-    owner = Owner(0, "admin", "123")
-    customers: dict[Customer.id, Customer] = dict()
-    for i, name in enumerate(C.nomes):
-        customers[i + 1] = Customer(
-            i + 1,
-            name,
-            "123",
-            Address(
-                "Rua Tal", "Belo Horizonte", "Minas Gerais", "12345678-09", 321, "A"
-            ),
-        )
+    try:
+        owner, customers, market, orders = F.load_data(C.database)
+    except FileNotFoundError:
+        print("Database não encontrada! (Execute o setup para cadastrar um dono)")
+    except json.JSONDecodeError as e:
+        print(f"Um erro ocorreu enquanto decodificando o arquivo JSON: {e}")
+    except Exception as e:
+        print(f"Um erro inexperado ocorreu enquanto carregando a database: {e}")
+
     auth_data = F.generate_auth_data(owner, customers)
-
-    # Obtém os produtos do mercado
-    market = Product_Manager(owner)
-    for i, product in enumerate(C.produtos):
-        market.register_product(i, product, C.precos[i])
-    for i, quantity in enumerate(C.quantidades):
-        market.add_product(i, quantity)
-
-    # Obtém os pedidos do mercado
-    orders = Order_Manager(owner)
-    _produto = deepcopy(market.get_product(0))
-    _produto.quantity = 1
-    orders.place_order(customers[1], [_produto])
 
     # --- Tela de início --- #
     logged_in = None
@@ -120,21 +103,7 @@ def run():
             print()
 
     # --- Finalização --- #
-    # TODO salvar os dados do programa
-    print("- - - Owner - - -")
-    print(owner)
-    print("- - -Customers - - -")
-    print(customers)
-    print("- - - Auth Data - - -")
-    print(auth_data)
-    print("- - - Market - - -")
-    print(market)
-    print("- - - Products - - -")
-    print(market.list_products())
-    print("- - - Order Manager - - -")
-    print(orders)
-    print("- - - Orders - - -")
-    print(orders.list_orders())
+    F.save_data(owner, customers, market, orders, C.database)
 
 
 if __name__ == "__main__":

@@ -1,10 +1,11 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from orders import constants as c
+from products import Product
 
 if TYPE_CHECKING:
-    from users import Customer
-    from products import Product
+    from users import Customer, Owner
 
 
 class Order:
@@ -12,7 +13,7 @@ class Order:
         self,
         id: int,
         customer: "Customer",
-        products: list["Product"],
+        products: list[Product],
         status: str = c.placed,
     ) -> None:
         """
@@ -39,6 +40,34 @@ class Order:
         self._price = 0.0
         for product in self._products:
             self._price += product.get_total_price()
+
+    @staticmethod
+    def from_dict(
+        data: dict,
+        customers: dict["Customer".id, "Customer"],
+        owner: "Owner",
+    ) -> Order:
+        customer = customers[data["customer_id"]]
+        products = [
+            Product.from_dict(product_data, owner) for product_data in data["products"]
+        ]
+        return Order(data["id"], customer, products, data["status"])
+
+    def to_dict(self) -> dict:
+        """
+        Transforma o objeto em um dicionário.
+
+        Returns
+        -------
+        dict
+            Dicionário
+        """
+        return {
+            "id": self.__id,
+            "customer_id": self.__customer.id,
+            "status": self._status,
+            "products": [product.to_dict() for product in self._products],
+        }
 
     def cancel(self) -> bool:
         """
@@ -122,7 +151,7 @@ class Order:
         return self._status
 
     @property
-    def products(self) -> list["Product"]:
+    def products(self) -> list[Product]:
         return self._products
 
     @property

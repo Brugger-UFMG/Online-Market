@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from users import Abstract_User
 from products import Product_Manager, Product
 from orders import Order_Manager, Order
@@ -27,6 +29,10 @@ class Owner(Abstract_User):
         super().__init__(id, name, password)
         self.__products: Product_Manager
         self.__orders: Order_Manager
+
+    @staticmethod
+    def from_dict(data: dict) -> Owner:
+        return Owner(**data)
 
     def view_orders(self) -> None:
         """

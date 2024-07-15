@@ -24,6 +24,21 @@ class Abstract_User(ABC):
         self._name = name
         self.__password = password
 
+    def to_dict(self) -> dict:
+        """
+        Transforma o objeto em um dicionário.
+
+        Returns
+        -------
+        dict
+            Dicionário
+        """
+        return {
+            "id": self.__id,
+            "name": self._name,
+            "password": self.__password,
+        }
+
     @abstractmethod
     def view_orders(self) -> None:
         pass
