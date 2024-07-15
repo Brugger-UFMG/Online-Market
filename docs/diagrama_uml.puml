@@ -11,25 +11,28 @@ package online_market {
         }
 
         class Order_Manager {
-            - «get» owner : Owner
             # «get» orders : dict[Order.id, Order]
+            - «get» owner : Owner
             --
-            - generate_id() -> int
             + place_order(customer: Customer, products: list[Product]) -> Order
             + cancel_order(order_id: int) -> bool
             + send_order(order_id: int) -> none
             + receive_order(order_id: int) -> none
             + list_orders() -> list[Order]
             + ids() -> set[int]
+            - generate_id() -> int
         }
 
         class Order {
-            - «get» id : int
-            - «get» customer : Customer
             # «get» status : str
             # «get» products : list[Product]
             # «get» price : float
+            - «get» id : int
+            - «get» customer : Customer
             --
+            + {static} from_dict(data: dict) -> none
+            + to_dict() -> dict
+
             + cancel() -> bool
             + send() -> bool
             + receive() -> bool
@@ -49,8 +52,8 @@ package online_market {
         }
 
         class Product_Manager {
-            - «get» owner : Owner
             # «get» products : dict[Product.id, Product]
+            - «get» owner : Owner
             --
             + register_product(id: int, name: str, price: float) -> none
             + add_product(product_id: int, ammount: int) -> none
@@ -63,12 +66,15 @@ package online_market {
         }
 
         class Product {
-            - «get» id : int
-            - «get» owner : Owner
             # «get/set» name : str 
             # «get/set» price : float
             # «get/set» quantity : int
+            - «get» id : int
+            - «get» owner : Owner
             --
+            + {static} from_dict(data: dict) -> none
+            + to_dict() -> dict
+
             + description() -> str
             + get_total_price() -> float
         }
@@ -76,14 +82,18 @@ package online_market {
 
     package users {
         abstract class Abstract_User {
-            - «get» id : int
             # «get/set» name : str
+            - «get» id : int
             - «get» password : str 
             --
+            + to_dict() -> dict
+
             + {abstract} view_orders() -> none
+
             + view_products(market: Product_Manager) -> none
             + get_permissions() -> list[str]
             + change_password() -> none
+
             # select_product(products: Product_Manager, message: str) -> int
         }
 
@@ -91,27 +101,33 @@ package online_market {
             - «get/set» products : Product_Manager
             - «get/set» orders : Order_Manager
             --
+            + {static} from_dict(data: dict) -> none
+
             + view_orders() -> none
             + add_product() -> none
             + remove_product() -> none
             + send_order() -> none
+
             - register_product() -> none
             - add_to_product() -> none
             - delete_product() -> none
             - remove_from_product() -> none
-
         }
 
         class Customer {
             # «get/set» address : Address
             # «get/set» orders: list[Order]
             --
+            + {static} from_dict(data: dict) -> none
+            + to_dict() -> dict
+
             + view_orders() -> none
             + view_products(market: Product_Manager) -> none
             + place_order(market_owner: Owner) -> none
             + get_order() -> Order
             + cancel_order() -> none
             + confirm_arrival() -> none
+
             - get_product_from_market(market: Product_Manager) -> Product | none
             - remove_product_from_list(products: list[Product]) -> none
         }
@@ -123,6 +139,9 @@ package online_market {
             + «get/set» zip_code: str
             + «get/set» house_number: int
             + «get/set» complement: str
+            --
+            + {static} from_dict(data: dict) -> none
+            + to_dict() -> dict
         }
     }
 }
